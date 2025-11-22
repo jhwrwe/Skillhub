@@ -200,12 +200,6 @@ php artisan test
 * Unique constraint error saat update: gunakan rule unique yang mengecualikan id yang sedang diupdate
 * Masalah timezone saat hitung status kelas: set timezone di `config/app.php` atau di `.env` agar konsisten
 
-## Tips pengembangan
-
-* Buat seeder untuk data contoh: admin, beberapa siswa, dan beberapa kelas
-* Tambahkan unit test untuk flow join/leave dan CRUD kelas
-* Pertimbangkan pagination untuk daftar kelas dan peserta jika datanya banyak
-* Tulis policy/gate untuk akses action admin agar lebih aman
 
 ## Kontribusi
 
@@ -214,11 +208,3 @@ php artisan test
 3. Commit dan push
 4. Buka pull request dan jelaskan perubahan
 
-## Lisensi
-
-MIT
-
-## Kontak
-
-Butuh bantuan memperluas README, menambahkan diagram ERD, menulis seeder contoh, atau membuat test?
-Katakan saja, aku bantu lanjutkan.
