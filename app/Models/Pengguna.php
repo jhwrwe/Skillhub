@@ -30,15 +30,12 @@ class Pengguna extends Authenticatable
         ];
     }
 
-    // Relasi ke Kelas (many-to-many)
     public function kelas()
     {
         return $this->belongsToMany(Kelas::class, 'pengguna_kelas', 'pengguna_id', 'kelas_id')
                     ->withPivot('registration_date')
                     ->withTimestamps();
     }
-
-    // Helper methods
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

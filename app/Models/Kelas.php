@@ -25,7 +25,6 @@ class Kelas extends Model
         ];
     }
 
-    // Relasi ke Pengguna (students yang join)
     public function pengguna()
     {
         return $this->belongsToMany(Pengguna::class, 'pengguna_kelas', 'kelas_id', 'pengguna_id')
@@ -33,7 +32,6 @@ class Kelas extends Model
                     ->withTimestamps();
     }
 
-    // Scope untuk filter by status
     public function scopeOngoing($query)
     {
         return $query->where('status', 'ongoing');
