@@ -7,7 +7,33 @@
     <h1 class="text-3xl font-bold mb-6">Edit Kelas</h1>
 
     <div class="bg-gray-800 rounded-xl p-8">
-        <form action="{{ route('admin.kelas.update', $kelas) }}" method="POST">
+        <!-- Info Box -->
+        <div class="bg-blue-600/20 border border-blue-600 text-blue-400 px-4 py-3 rounded-lg mb-6">
+            <p class="text-sm">ℹ️ <strong>Status kelas akan otomatis diperbarui</strong> berdasarkan tanggal:</p>
+            <ul class="text-xs mt-2 ml-4 list-disc">
+                <li><strong>Upcoming:</strong> Jika waktu mulai belum tiba</li>
+                <li><strong>Ongoing:</strong> Jika kelas sedang berlangsung</li>
+                <li><strong>Completed:</strong> Jika waktu selesai sudah lewat</li>
+            </ul>
+        </div>
+
+        <!-- Current Status Display -->
+        <div class="mb-6 p-4 bg-gray-700 rounded-lg">
+            <p class="text-gray-300 text-sm mb-2">Status saat ini:</p>
+            @php
+                $currentStatus = $kelas->calculateStatus();
+                $statusClasses = [
+                    'upcoming' => 'bg-yellow-600 text-white',
+                    'ongoing' => 'bg-green-600 text-white',
+                    'completed' => 'bg-gray-600 text-white'
+                ];
+            @endphp
+            <span class="px-3 py-1 text-sm rounded-full font-semibold {{ $statusClasses[$currentStatus] }}">
+                {{ ucfirst($currentStatus) }}
+            </span>
+        </div>
+
+        <form action="{{ route('admin.kelas.update', $kelas) }}" method="POST" id="kelasForm">
             @csrf
             @method('PUT')
 
@@ -37,17 +63,7 @@
                 @enderror
             </div>
 
-            <div class="mb-4">
-                <label for="status" class="block text-gray-300 mb-2">Status</label>
-                <select name="status" id="status"
-                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    <option value="upcoming" {{ old('status', $kelas->status) == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                    <option value="ongoing" {{ old('status', $kelas->status) == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
-                    <option value="completed" {{ old('status', $kelas->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label for="waktu_mulai" class="block text-gray-300 mb-2">Waktu Mulai</label>
                     <input type="datetime-local" name="waktu_mulai" id="waktu_mulai"
@@ -70,6 +86,13 @@
                 </div>
             </div>
 
+            <!-- Status Preview -->
+            <div id="statusPreview" class="mb-6 p-4 bg-gray-700 rounded-lg">
+                <p class="text-gray-300 text-sm mb-2">Status setelah update:</p>
+                <span id="statusBadge" class="px-3 py-1 text-sm rounded-full font-semibold"></span>
+                <p id="statusExplanation" class="text-xs text-gray-400 mt-2"></p>
+            </div>
+
             <div class="flex gap-4">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition">
                     Update Kelas
@@ -81,4 +104,59 @@
         </form>
     </div>
 </div>
+
+<script>
+    const waktuMulai = document.getElementById('waktu_mulai');
+    const waktuSelesai = document.getElementById('waktu_selesai');
+    const statusPreview = document.getElementById('statusPreview');
+    const statusBadge = document.getElementById('statusBadge');
+    const statusExplanation = document.getElementById('statusExplanation');
+
+    function updateStatusPreview() {
+        if (!waktuMulai.value || !waktuSelesai.value) {
+            return;
+        }
+
+        const start = new Date(waktuMulai.value);
+        const end = new Date(waktuSelesai.value);
+        const now = new Date();
+
+        let status, statusClass, explanation;
+
+        if (now < start) {
+            status = 'Upcoming';
+            statusClass = 'bg-yellow-600 text-white';
+            explanation = `Kelas belum dimulai. Akan mulai pada ${start.toLocaleString('id-ID')}`;
+        } else if (now >= start && now <= end) {
+            status = 'Ongoing';
+            statusClass = 'bg-green-600 text-white';
+            explanation = `Kelas sedang berlangsung. Dimulai ${start.toLocaleString('id-ID')} dan berakhir ${end.toLocaleString('id-ID')}`;
+        } else {
+            status = 'Completed';
+            statusClass = 'bg-gray-600 text-white';
+            explanation = `Kelas sudah selesai pada ${end.toLocaleString('id-ID')}`;
+        }
+
+        statusBadge.textContent = status;
+        statusBadge.className = `px-3 py-1 text-sm rounded-full font-semibold ${statusClass}`;
+        statusExplanation.textContent = explanation;
+    }
+
+    updateStatusPreview();
+
+    waktuMulai.addEventListener('change', updateStatusPreview);
+    waktuSelesai.addEventListener('change', updateStatusPreview);
+    waktuMulai.addEventListener('input', updateStatusPreview);
+    waktuSelesai.addEventListener('input', updateStatusPreview);
+
+    document.getElementById('kelasForm').addEventListener('submit', function(e) {
+        const start = new Date(waktuMulai.value);
+        const end = new Date(waktuSelesai.value);
+
+        if (end <= start) {
+            e.preventDefault();
+            alert('Waktu selesai harus setelah waktu mulai!');
+        }
+    });
+</script>
 @endsection
