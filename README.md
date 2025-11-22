@@ -1,59 +1,224 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# README.md
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Aplikasi Kursus Sederhana (Laravel)
 
-## About Laravel
+Dokumentasi ini siap untuk langsung di-copy paste ke file `README.md` di repository-mu.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Ringkasan singkat
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Aplikasi ini adalah platform kursus sederhana dengan relasi many-to-many antara peserta (Pengguna) dan Kelas.
+Fitur utama:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Autentikasi: register, login, logout
+* Dashboard user dan dashboard admin
+* CRUD kelas untuk admin
+* Peserta bisa join / leave kelas
+* Admin bisa mendaftarkan atau mengeluarkan peserta dari kelas
+* Pivot menyimpan `registration_date` untuk melacak waktu pendaftaran
 
-## Learning Laravel
+## Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+* Backend: Laravel (PHP)
+* Database: MySQL
+* Templating: Blade
+* Dependency: Composer (PHP), NPM opsional untuk asset
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Struktur data penting
 
-## Laravel Sponsors
+* Model `Pengguna` (kolom: id, nama_lengkap, email, password, alamat, role)
+* Model `Kelas` (kolom: id, nama_kelas, deskripsi, instruktor, waktu_mulai, waktu_selesai, status)
+* Relasi many-to-many antara `Pengguna` dan `Kelas` via pivot table (misal `kelas_pengguna`)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+  * Pivot menyimpan `registration_date`
+* Model `Kelas` sebaiknya memiliki method `calculateStatus()` yang mengembalikan status: upcoming, ongoing, atau completed
+* Scope `Kelas::ongoing()` dan `Kelas::upcoming()` berguna untuk query berdasarkan status
 
-### Premium Partners
+## Persiapan lingkungan (local)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. Clone repo
 
-## Contributing
+```bash
+git clone <repo-url>
+cd <project-folder>
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. Install dependency PHP
 
-## Code of Conduct
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. Copy environment dan generate app key
 
-## Security Vulnerabilities
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Edit file `.env` untuk koneksi database
+   Contoh:
 
-## License
+```
+APP_NAME="KursusApp"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database
+DB_USERNAME=root
+DB_PASSWORD=secret
+```
+
+5. Migrasi database
+
+```bash
+php artisan migrate
+```
+
+6. (Opsional) Seed data jika ada seeder
+
+```bash
+php artisan db:seed
+```
+
+7. Jalankan aplikasi
+
+```bash
+php artisan serve
+# buka http://127.0.0.1:8000
+```
+
+8. (Opsional) Asset pipeline
+
+```bash
+npm install
+npm run dev
+```
+
+## Membuat akun admin (opsional)
+
+Jika belum ada seeder admin, buat via tinker:
+
+```bash
+php artisan tinker
+
+>>> use App\Models\Pengguna;
+>>> use Illuminate\Support\Facades\Hash;
+>>> Pengguna::create([
+... 'nama_lengkap' => 'Admin',
+... 'email' => 'admin@example.com',
+... 'password' => Hash::make('password123'),
+... 'role' => 'admin'
+... ]);
+```
+
+## Daftar route penting (sesuai `web.php` di project)
+
+* Public
+
+```text
+GET  /                -> view: auth.login (homepage)
+```
+
+* Auth (guest)
+
+```text
+GET  /login           -> AuthController@showLogin       name: login
+POST /login           -> AuthController@login
+GET  /register        -> AuthController@showRegister    name: register
+POST /register        -> AuthController@register
+```
+
+* Logout
+
+```text
+POST /logout          -> AuthController@logout          name: logout (middleware: auth)
+```
+
+* User (middleware: auth)
+
+```text
+GET  /dashboard               -> DashboardController@index        name: dashboard
+
+GET  /kelas                   -> KelasController@index            name: kelas.index
+GET  /kelas/{kelas}           -> KelasController@showDetail       name: kelas.detail
+GET  /my-kelas                -> KelasController@myKelas         name: kelas.my
+POST /kelas/{kelas}/join      -> KelasController@join            name: kelas.join
+POST /kelas/{kelas}/leave     -> KelasController@leave           name: kelas.leave
+```
+
+* Admin (middleware: auth, admin) prefix: /admin, route name prefix: admin.
+
+```text
+GET    /admin/dashboard                                -> DashboardController@adminDashboard   name: admin.dashboard
+
+GET    /admin/kelas                                    -> KelasController@adminIndex           name: admin.kelas.index
+GET    /admin/kelas/create                             -> KelasController@create               name: admin.kelas.create
+POST   /admin/kelas                                    -> KelasController@store                name: admin.kelas.store
+GET    /admin/kelas/{kelas}/show                       -> KelasController@show                 name: admin.kelas.show
+POST   /admin/kelas/{kelas}/daftarkan-peserta          -> KelasController@daftarkanPeserta     name: admin.kelas.daftarkan-peserta
+GET    /admin/kelas/{kelas}/edit                       -> KelasController@edit                 name: admin.kelas.edit
+PUT    /admin/kelas/{kelas}                            -> KelasController@update               name: admin.kelas.update
+DELETE /admin/kelas/{kelas}                            -> KelasController@destroy              name: admin.kelas.destroy
+DELETE /admin/kelas/{kelas}/peserta/{pengguna}        -> KelasController@removePeserta        name: admin.kelas.remove-peserta
+
+GET    /admin/peserta                                  -> PenggunaController@index             name: admin.peserta.index
+GET    /admin/peserta/create                           -> PenggunaController@create            name: admin.peserta.create
+POST   /admin/peserta                                  -> PenggunaController@store             name: admin.peserta.store
+GET    /admin/peserta/{pengguna}                       -> PenggunaController@show              name: admin.peserta.show
+GET    /admin/peserta/{pengguna}/edit                  -> PenggunaController@edit              name: admin.peserta.edit
+PUT    /admin/peserta/{pengguna}                       -> PenggunaController@update            name: admin.peserta.update
+DELETE /admin/peserta/{pengguna}                       -> PenggunaController@destroy           name: admin.peserta.destroy
+
+POST   /admin/peserta/{pengguna}/daftar-kelas          -> PenggunaController@daftarKelas       name: admin.peserta.daftar-kelas
+DELETE /admin/peserta/{pengguna}/batal-kelas/{kelas}  -> PenggunaController@batalKelas        name: admin.peserta.batal-kelas
+```
+
+Catatan: pastikan middleware `auth` aktif untuk route user dan middleware `admin` atau gate `isAdmin` tersedia untuk route admin.
+
+## Validasi dan logika penting
+
+* Semua input create/update divalidasi via `$request->validate()`
+* Pada operasi join/daftar: cek status kelas dengan `calculateStatus()` untuk mencegah pendaftaran ke kelas yang sudah selesai
+* Saat attach many-to-many selalu isi `registration_date` di pivot
+* Cegah admin menghapus akun sendiri di `PenggunaController::destroy`
+
+## Testing
+
+Jika ada test:
+
+```bash
+php artisan test
+```
+
+## Troubleshooting umum
+
+* Migrasi gagal: cek kredensial database di `.env` dan pastikan database sudah ada
+* Unique constraint error saat update: gunakan rule unique yang mengecualikan id yang sedang diupdate
+* Masalah timezone saat hitung status kelas: set timezone di `config/app.php` atau di `.env` agar konsisten
+
+## Tips pengembangan
+
+* Buat seeder untuk data contoh: admin, beberapa siswa, dan beberapa kelas
+* Tambahkan unit test untuk flow join/leave dan CRUD kelas
+* Pertimbangkan pagination untuk daftar kelas dan peserta jika datanya banyak
+* Tulis policy/gate untuk akses action admin agar lebih aman
+
+## Kontribusi
+
+1. Fork repository
+2. Buat branch fitur/bugfix `git checkout -b feat/nama-fitur`
+3. Commit dan push
+4. Buka pull request dan jelaskan perubahan
+
+## Lisensi
+
+MIT
+
+## Kontak
+
+Butuh bantuan memperluas README, menambahkan diagram ERD, menulis seeder contoh, atau membuat test?
+Katakan saja, aku bantu lanjutkan.
