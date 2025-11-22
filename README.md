@@ -38,8 +38,8 @@ Fitur utama:
 1. Clone repo
 
 ```bash
-git clone <repo-url>
-cd <project-folder>
+git clone https://github.com/jhwrwe/Skillhub.git
+cd Skillhub
 ```
 
 2. Install dependency PHP
