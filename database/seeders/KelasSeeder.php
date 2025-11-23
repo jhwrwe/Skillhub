@@ -9,9 +9,6 @@ use Carbon\Carbon;
 
 class KelasSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $kelas = [
