@@ -151,8 +151,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Info Tambahan -->
                 <div class="mt-6 pt-4 border-t border-gray-700">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-gray-700 rounded-lg p-3">

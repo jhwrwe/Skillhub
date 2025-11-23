@@ -7,7 +7,6 @@
     <h1 class="text-3xl font-bold mb-6">Edit Kelas</h1>
 
     <div class="bg-gray-800 rounded-xl p-8">
-        <!-- Info Box -->
         <div class="bg-blue-600/20 border border-blue-600 text-blue-400 px-4 py-3 rounded-lg mb-6">
             <p class="text-sm">ℹ️ <strong>Status kelas akan otomatis diperbarui</strong> berdasarkan tanggal:</p>
             <ul class="text-xs mt-2 ml-4 list-disc">
@@ -17,7 +16,6 @@
             </ul>
         </div>
 
-        <!-- Current Status Display -->
         <div class="mb-6 p-4 bg-gray-700 rounded-lg">
             <p class="text-gray-300 text-sm mb-2">Status saat ini:</p>
             @php
@@ -86,7 +84,6 @@
                 </div>
             </div>
 
-            <!-- Status Preview -->
             <div id="statusPreview" class="mb-6 p-4 bg-gray-700 rounded-lg">
                 <p class="text-gray-300 text-sm mb-2">Status setelah update:</p>
                 <span id="statusBadge" class="px-3 py-1 text-sm rounded-full font-semibold"></span>
