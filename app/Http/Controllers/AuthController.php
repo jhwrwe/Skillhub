@@ -7,11 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Controller untuk autentikasi pengguna:
- * - Menangani tampilan login/register
- * - Menangani proses login, registrasi, logout
- */
+
 class AuthController extends Controller
 {
     // Tampilkan form login

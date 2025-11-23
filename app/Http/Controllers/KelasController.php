@@ -7,11 +7,7 @@ use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-/**
- * Controller untuk operasi kelas:
- * - Menampilkan kelas, bergabung/keluar, detail kelas
- * - CRUD kelas untuk admin, mendaftarkan peserta, dan menghapus peserta
- */
+
 class KelasController extends Controller
 {
     // Tampilkan daftar semua kelas untuk user biasa
