@@ -81,7 +81,8 @@ php artisan migrate
 6. (Opsional) Seed data jika ada seeder
 
 ```bash
-php artisan db:seed
+php artisan db:seed --class=KelasSeeder
+php artisan db:seed --class=AdminSeeder
 ```
 
 7. Jalankan aplikasi
