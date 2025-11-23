@@ -78,7 +78,7 @@ DB_PASSWORD=secret
 php artisan migrate
 ```
 
-6. (Opsional) Seed data jika ada seeder
+6. Seed data jika ada seeder
 
 ```bash
 php artisan db:seed --class=KelasSeeder
