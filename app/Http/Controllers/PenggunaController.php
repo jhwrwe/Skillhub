@@ -7,10 +7,7 @@ use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Controller untuk manajemen peserta oleh admin:
- * - CRUD peserta, melihat detail peserta, mendaftarkan peserta ke kelas, batalkan pendaftaran
- */
+
 class PenggunaController extends Controller
 {
     // Tampilkan semua peserta beserta jumlah kelas yang diikuti
