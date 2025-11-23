@@ -32,7 +32,7 @@ class KelasTest extends TestCase
 
     // ==================== CRUD KELAS ====================
 
-    /** @test */
+    /** @test - Admin dapat melihat daftar kelas*/
     public function admin_can_view_kelas_index()
     {
         $response = $this->actingAs($this->admin)
@@ -42,7 +42,7 @@ class KelasTest extends TestCase
         $response->assertViewIs('admin.kelas.index');
     }
 
-    /** @test */
+    /** @test - Admin dapat membuat kelas baru*/
     public function admin_can_create_kelas()
     {
         $kelasData = [
@@ -60,7 +60,7 @@ class KelasTest extends TestCase
         $this->assertDatabaseHas('kelas', ['nama_kelas' => 'Laravel Testing']);
     }
 
-    /** @test */
+    /** @test - Admin dapat mengupdate kelas*/
     public function admin_can_update_kelas()
     {
         $kelas = Kelas::factory()->create();
@@ -78,7 +78,7 @@ class KelasTest extends TestCase
         $this->assertDatabaseHas('kelas', ['nama_kelas' => 'Updated Kelas Name']);
     }
 
-    /** @test */
+    /** @test - Admin dapat menghapus kelas*/
     public function admin_can_delete_kelas()
     {
         $kelas = Kelas::factory()->create();
@@ -90,7 +90,7 @@ class KelasTest extends TestCase
         $this->assertDatabaseMissing('kelas', ['id' => $kelas->id]);
     }
 
-    /** @test */
+    /** @test - Validasi: waktu_selesai harus setelah waktu_mulai*/
     public function kelas_requires_valid_dates()
     {
         $response = $this->actingAs($this->admin)
@@ -104,7 +104,7 @@ class KelasTest extends TestCase
         $response->assertSessionHasErrors('waktu_selesai');
     }
 
-    /** @test */
+    /** @test - Status 'upcoming' jika kelas belum dimulai*/
     public function kelas_status_calculated_as_upcoming()
     {
         $kelas = Kelas::factory()->create([
@@ -115,7 +115,7 @@ class KelasTest extends TestCase
         $this->assertEquals('upcoming', $kelas->calculateStatus());
     }
 
-    /** @test */
+    /** @test - Status 'ongoing' jika kelas sedang berlangsung*/
     public function kelas_status_calculated_as_ongoing()
     {
         $kelas = Kelas::factory()->create([
@@ -126,7 +126,7 @@ class KelasTest extends TestCase
         $this->assertEquals('ongoing', $kelas->calculateStatus());
     }
 
-    /** @test */
+    /** @test - Status 'completed' jika kelas sudah selesai*/
     public function kelas_status_calculated_as_completed()
     {
         $kelas = Kelas::factory()->create([
@@ -139,7 +139,7 @@ class KelasTest extends TestCase
 
     // ==================== STUDENT KELAS ====================
 
-    /** @test */
+    /** @test - Student dapat melihat daftar kelas yang tersedia*/
     public function student_can_view_available_kelas()
     {
         Kelas::factory()->count(3)->create();
@@ -151,7 +151,7 @@ class KelasTest extends TestCase
         $response->assertViewIs('kelas.index');
     }
 
-    /** @test */
+    /** @test - Student dapat bergabung ke kelas*/
     public function student_can_join_kelas()
     {
         $kelas = Kelas::factory()->create([
@@ -172,7 +172,7 @@ class KelasTest extends TestCase
         ]);
     }
 
-    /** @test */
+    /** @test - Student tidak bisa join kelas yang sudah selesai*/
     public function student_cannot_join_completed_kelas()
     {
         $kelas = Kelas::factory()->create([
@@ -184,26 +184,30 @@ class KelasTest extends TestCase
             ->post(route('kelas.join', $kelas));
 
         $response->assertSessionHas('error');
+        // Cek student tidak terdaftar di kelas
         $this->assertFalse($this->student->fresh()->kelas->contains($kelas->id));
     }
 
-    /** @test */
+    /** @test - Student dapat keluar dari kelas*/
     public function student_can_leave_kelas()
     {
         $kelas = Kelas::factory()->create();
+        // Daftarkan student ke kelas terlebih dahulu
         $this->student->kelas()->attach($kelas->id, ['registration_date' => now()]);
 
         $response = $this->actingAs($this->student)
             ->post(route('kelas.leave', $kelas));
 
         $response->assertRedirect();
+        // Cek student sudah tidak terdaftar
         $this->assertFalse($this->student->fresh()->kelas->contains($kelas->id));
     }
 
-    /** @test */
+    /** @test - Student dapat melihat kelas yang diikuti*/
     public function student_can_view_my_kelas()
     {
         $kelas = Kelas::factory()->count(2)->create();
+        // Daftarkan student ke semua kelas
         $this->student->kelas()->attach($kelas->pluck('id'), ['registration_date' => now()]);
 
         $response = $this->actingAs($this->student)
