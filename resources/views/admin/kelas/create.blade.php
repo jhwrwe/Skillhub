@@ -67,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- Status Preview -->
             <div id="statusPreview" class="mb-6 p-4 bg-gray-700 rounded-lg hidden">
                 <p class="text-gray-300 text-sm mb-2">Status yang akan diterapkan:</p>
                 <span id="statusBadge" class="px-3 py-1 text-sm rounded-full font-semibold"></span>
