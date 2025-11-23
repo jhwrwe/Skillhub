@@ -12,7 +12,7 @@ class AuthTest extends TestCase
 
     // ==================== REGISTRATION ====================
 
-    /** @test */
+    /** @test - Halaman register dapat diakses oleh guest */
     public function guest_can_view_register_page()
     {
         $response = $this->get(route('register'));
@@ -21,7 +21,7 @@ class AuthTest extends TestCase
         $response->assertViewIs('auth.register');
     }
 
-    /** @test */
+    /** @test - Guest dapat melakukan registrasi dengan data valid */
     public function guest_can_register()
     {
         $response = $this->post(route('register'), [
@@ -40,7 +40,7 @@ class AuthTest extends TestCase
         ]);
     }
 
-    /** @test */
+    /** @test - Registrasi gagal jika data tidak valid*/
     public function registration_requires_valid_data()
     {
         $response = $this->post(route('register'), [
@@ -53,9 +53,10 @@ class AuthTest extends TestCase
         $response->assertSessionHasErrors(['nama_lengkap', 'email', 'password']);
     }
 
-    /** @test */
+    /** @test - Email harus unik saat registrasi */
     public function registration_requires_unique_email()
     {
+        // Buat user dengan email yang sudah ada
         Pengguna::factory()->create(['email' => 'existing@test.com']);
 
         $response = $this->post(route('register'), [
@@ -70,7 +71,7 @@ class AuthTest extends TestCase
 
     // ==================== LOGIN ====================
 
-    /** @test */
+    /** @test - Halaman login dapat diakses oleh guest*/
     public function guest_can_view_login_page()
     {
         $response = $this->get(route('login'));
@@ -79,7 +80,7 @@ class AuthTest extends TestCase
         $response->assertViewIs('auth.login');
     }
 
-    /** @test */
+    /** @test - User dapat login dengan kredensial yang benar*/
     public function user_can_login_with_valid_credentials()
     {
         $user = Pengguna::factory()->create([
@@ -97,7 +98,7 @@ class AuthTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    /** @test */
+    /** @test - Admin diarahkan ke admin dashboard setelah login*/
     public function admin_redirected_to_admin_dashboard_after_login()
     {
         $admin = Pengguna::factory()->create([
@@ -115,7 +116,7 @@ class AuthTest extends TestCase
         $this->assertAuthenticatedAs($admin);
     }
 
-    /** @test */
+    /** @test - Login gagal dengan password salah*/
     public function user_cannot_login_with_invalid_credentials()
     {
         Pengguna::factory()->create([
@@ -132,7 +133,7 @@ class AuthTest extends TestCase
         $this->assertGuest();
     }
 
-    /** @test */
+    /** @test - Login gagal dengan email yang tidak terdaftar */
     public function user_cannot_login_with_nonexistent_email()
     {
         $response = $this->post(route('login'), [
@@ -146,29 +147,32 @@ class AuthTest extends TestCase
 
     // ==================== LOGOUT ====================
 
-    /** @test */
+    /** @test - User yang sudah login dapat logout*/
     public function authenticated_user_can_logout()
     {
         $user = Pengguna::factory()->create();
 
+        // Simulasi sebagai user yang login
         $response = $this->actingAs($user)
             ->post(route('logout'));
 
         $response->assertRedirect('/');
+        // Cek sudah logout
         $this->assertGuest();
     }
 
     // ==================== MIDDLEWARE ====================
 
-    /** @test */
+    /** @test - Guest tidak bisa akses dashboard*/
     public function guest_cannot_access_dashboard()
     {
         $response = $this->get('/dashboard');
 
+        // Redirect ke login
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /** @test - Guest tidak bisa akses route admin*/
     public function guest_cannot_access_admin_routes()
     {
         $response = $this->get('/admin/dashboard');
@@ -176,7 +180,7 @@ class AuthTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /** @test - Student tidak bisa akses route admin*/
     public function student_cannot_access_admin_routes()
     {
         $student = Pengguna::factory()->create(['role' => 'student']);
@@ -184,10 +188,11 @@ class AuthTest extends TestCase
         $response = $this->actingAs($student)
             ->get('/admin/dashboard');
 
+        // Forbidden
         $response->assertStatus(403);
     }
 
-    /** @test */
+    /** @test - Admin dapat mengakses route admin*/
     public function admin_can_access_admin_routes()
     {
         $admin = Pengguna::factory()->create(['role' => 'admin']);
@@ -198,7 +203,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    /** @test - User yang sudah login tidak bisa akses halaman login*/
     public function authenticated_user_cannot_access_login_page()
     {
         $user = Pengguna::factory()->create();
@@ -206,6 +211,7 @@ class AuthTest extends TestCase
         $response = $this->actingAs($user)
             ->get(route('login'));
 
+        // Redirect ke dashboard
         $response->assertRedirect('/dashboard');
     }
 }

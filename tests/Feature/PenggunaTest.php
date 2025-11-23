@@ -25,7 +25,7 @@ class PenggunaTest extends TestCase
 
     // ==================== CRUD PESERTA ====================
 
-    /** @test */
+    /** @test - Admin dapat melihat daftar peserta*/
     public function admin_can_view_peserta_index()
     {
         Pengguna::factory()->count(5)->create(['role' => 'student']);
@@ -37,7 +37,7 @@ class PenggunaTest extends TestCase
         $response->assertViewIs('admin.peserta.index');
     }
 
-    /** @test */
+    /** @test - Admin dapat melihat form tambah peserta*/
     public function admin_can_view_create_peserta_form()
     {
         $response = $this->actingAs($this->admin)
@@ -47,7 +47,7 @@ class PenggunaTest extends TestCase
         $response->assertViewIs('admin.peserta.create');
     }
 
-    /** @test */
+    /** @test - Admin dapat menambah peserta baru*/
     public function admin_can_create_peserta()
     {
         $pesertaData = [
@@ -66,7 +66,7 @@ class PenggunaTest extends TestCase
         $this->assertDatabaseHas('pengguna', ['email' => 'peserta@test.com']);
     }
 
-    /** @test */
+    /** @test - Admin dapat melihat detail peserta*/
     public function admin_can_view_peserta_detail()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
@@ -78,7 +78,7 @@ class PenggunaTest extends TestCase
         $response->assertViewIs('admin.peserta.show');
     }
 
-    /** @test */
+    /** @test - Admin dapat mengupdate data peserta*/
     public function admin_can_update_peserta()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
@@ -95,7 +95,7 @@ class PenggunaTest extends TestCase
         $this->assertDatabaseHas('pengguna', ['nama_lengkap' => 'Updated Name']);
     }
 
-    /** @test */
+    /** @test - Admin dapat mengupdate password peserta*/
     public function admin_can_update_peserta_password()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
@@ -112,10 +112,11 @@ class PenggunaTest extends TestCase
             ]);
 
         $response->assertRedirect(route('admin.peserta.index'));
+        // Cek password berubah
         $this->assertNotEquals($oldPassword, $peserta->fresh()->password);
     }
 
-    /** @test */
+    /** @test - Admin dapat menghapus peserta*/
     public function admin_can_delete_peserta()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
@@ -127,17 +128,18 @@ class PenggunaTest extends TestCase
         $this->assertDatabaseMissing('pengguna', ['id' => $peserta->id]);
     }
 
-    /** @test */
+    /** @test - Admin tidak bisa menghapus akun sendiri*/
     public function admin_cannot_delete_own_account()
     {
         $response = $this->actingAs($this->admin)
             ->delete(route('admin.peserta.destroy', $this->admin));
 
         $response->assertSessionHas('error');
+        // Cek admin masih ada di database
         $this->assertDatabaseHas('pengguna', ['id' => $this->admin->id]);
     }
 
-    /** @test */
+    /** @test - Email peserta harus unik*/
     public function peserta_email_must_be_unique()
     {
         Pengguna::factory()->create(['email' => 'existing@test.com']);
@@ -145,6 +147,7 @@ class PenggunaTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post(route('admin.peserta.store'), [
                 'nama_lengkap' => 'Test',
+                // Email sudah ada
                 'email' => 'existing@test.com',
                 'password' => 'password123',
                 'password_confirmation' => 'password123',
@@ -156,7 +159,7 @@ class PenggunaTest extends TestCase
 
     // ==================== PENDAFTARAN PESERTA KE KELAS ====================
 
-    /** @test */
+    /** @test - Admin dapat mendaftarkan peserta ke kelas*/
     public function admin_can_register_peserta_to_kelas()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
@@ -168,30 +171,35 @@ class PenggunaTest extends TestCase
             ]);
 
         $response->assertRedirect();
+        // Cek relasi many-to-many berhasil
         $this->assertTrue($peserta->fresh()->kelas->contains($kelas->id));
     }
 
-    /** @test */
+    /** @test - Admin dapat membatalkan pendaftaran peserta dari kelas*/
     public function admin_can_cancel_peserta_registration()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
         $kelas = Kelas::factory()->create();
+        // Daftarkan dulu
         $peserta->kelas()->attach($kelas->id, ['registration_date' => now()]);
 
         $response = $this->actingAs($this->admin)
             ->delete(route('admin.peserta.batal-kelas', [$peserta, $kelas]));
 
         $response->assertRedirect();
+        // Cek sudah tidak terdaftar
         $this->assertFalse($peserta->fresh()->kelas->contains($kelas->id));
     }
 
-    /** @test */
+    /** @test - Tidak bisa mendaftarkan peserta ke kelas yang sama dua kali*/
     public function cannot_register_peserta_to_same_kelas_twice()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
         $kelas = Kelas::factory()->create();
+        // Daftarkan pertama kali
         $peserta->kelas()->attach($kelas->id, ['registration_date' => now()]);
 
+        // Coba daftarkan lagi
         $response = $this->actingAs($this->admin)
             ->post(route('admin.peserta.daftar-kelas', $peserta), [
                 'kelas_id' => $kelas->id,
@@ -200,25 +208,25 @@ class PenggunaTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    /** @test */
+    /** @test - Relasi peserta ke kelas berfungsi dengan benar*/
     public function peserta_kelas_relationship_works()
     {
         $peserta = Pengguna::factory()->create(['role' => 'student']);
         $kelas = Kelas::factory()->count(3)->create();
-
+        // Daftarkan ke 3 kelas
         $peserta->kelas()->attach($kelas->pluck('id'), ['registration_date' => now()]);
-
+        // Cek peserta punya 3 kelas
         $this->assertCount(3, $peserta->fresh()->kelas);
     }
 
-    /** @test */
+    /** @test  Relasi kelas ke pengguna berfungsi dengan benar*/
     public function kelas_pengguna_relationship_works()
     {
         $kelas = Kelas::factory()->create();
         $peserta = Pengguna::factory()->count(5)->create(['role' => 'student']);
-
+        // Daftarkan 5 peserta ke kelas
         $kelas->pengguna()->attach($peserta->pluck('id'), ['registration_date' => now()]);
-
+        // Cek kelas punya 5 peserta
         $this->assertCount(5, $kelas->fresh()->pengguna);
     }
 }
