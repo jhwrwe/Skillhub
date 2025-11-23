@@ -98,6 +98,18 @@ npm install
 npm run dev
 ```
 
+9. (opsional) testing menggunakan php unit
+```bash
+php artisan test
+```
+
+10. (Opsional) Jika testing ingin mau satu-satu
+```bash
+php artisan test tests/Feature/AuthTest.php
+php artisan test tests/Feature/KelasTest.php
+php artisan test tests/Feature/PenggunaTest.php
+```
+
 ## Membuat akun admin (opsional)
 
 Jika belum ada seeder admin, buat via tinker:
